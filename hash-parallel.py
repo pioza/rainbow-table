@@ -1,82 +1,58 @@
 import threading
-import time
 from Crypto.Cipher import DES
 import re
 import os
 
 
-class myThread (threading.Thread):
+class myThread (threading.Thread): #nadpisanie klasy Thread - potrzebne do watkow
     def __init__(self, threadID, name):
         threading.Thread.__init__(self)
         self.threadID = threadID
         self.name = name
     def run(self):
-        print ("Starting " + self.name)
         # zlapanie zamka - synchronizacja
         threadLock.acquire()
-        #
-        # TU SB ROBIMY
-        #print_time(self.name, 3)
         hashing()
         reduction()
-        #KONIEC WATKU
         # wypuszczenie zamka - dla innych watkow
         threadLock.release()
 
-def print_time(threadName, counter):
-    while counter:
-        print ("%s: %s" % (threadName, time.ctime(time.time())))
-        counter -= 1
-
-### WKLEJONE
-
-
-
 def hashing():
-    if os.path.getsize("/home/piotr/PycharmProjects/rt/plaintextes.txt") ==0:
+    if os.path.getsize("/home/piotr/PycharmProjects/rt/plaintextes.txt") ==0: # sprawdzenie czy plik jest pusty
         plain_text=b'cokolwiek_co_ma_24_znaki'
     else:
         with open('plaintextes.txt', 'rb') as file:
             plain_text=file.read()[-8:]
     c=0
-    while c<5:
+    while c<5: #hashowanie i redukcja - tutaj przyjete 5 razy
         my_hash=minihash(plain_text)
         minireduction(my_hash)
         c+=1
     encrypted=my_hash
-    with open('hashes.txt', 'ab') as hashfile:
+    with open('hashes.txt', 'ab') as hashfile: #zapis do pliku z hashami
         hashfile.write(encrypted)
-    with open('plaintextes.txt', 'ab') as passes:
+    with open('plaintextes.txt', 'ab') as passes: #zapis do pliku z haslami
         passes.write(plain_text)
 
 def reduction():
-    if os.path.getsize("/home/piotr/PycharmProjects/rt/hashes.txt") ==0:
+    if os.path.getsize("/home/piotr/PycharmProjects/rt/hashes.txt") ==0: #sprawdzenie czy plik nie jest pusty
         reduced="sth"
     else:
-        with open('hashes.txt', 'rb') as hashfile:
+        with open('hashes.txt', 'rb') as hashfile: #pobieramy hash do redukcji
             hash=hashfile.read()[-8:]
-        print(hash)
         reduced=minireduction(hash)
-    with open('plaintextes.txt', 'ab') as passes:
+    with open('plaintextes.txt', 'ab') as passes: # dodajemy nowye tekst do zahashowania
         passes.write(bytes(reduced, 'utf8'))
 
-def minihash(plain_text):
+def minihash(plain_text): #jej jedynym zadaniem jest wykonywanie hashy
     key = b'key12345'
     iv = b"\0\0\0\0\0\0\0\0"
     cipher = DES.new(key, DES.MODE_CBC, iv)
     encrypted = cipher.encrypt(plain_text)
     return encrypted
 
-def minireduction(hash):
+def minireduction(hash): ##jej jedynym zadaniem jest redukcja
     return "".join(re.findall("[a-zA-Z0-9]+", str(hash)))[1:4]
-
-
-
-
-#####
-
-
-
 
 threadLock = threading.Lock()
 threads = []
@@ -104,4 +80,4 @@ threads.append(thread5)
 # czekanie na zakonczenie watkow
 for t in threads:
     t.join()
-print ("Exiting Main Thread")
+print ("Program finished")
