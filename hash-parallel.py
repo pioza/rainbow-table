@@ -19,10 +19,10 @@ class myThread (threading.Thread): #nadpisanie klasy Thread - potrzebne do watko
 
 def hashing():
     if os.path.getsize("/home/piotr/PycharmProjects/rt/plaintextes.txt") ==0: # sprawdzenie czy plik jest pusty
-        plain_text=b'cokolwiek_co_ma_24_znaki'
+        plain_text=b'qwertyuiopasdfghjklzxcvb'
     else:
         with open('plaintextes.txt', 'rb') as file:
-            plain_text=file.read()[-8:]
+            plain_text=file.read()[-24:]
     c=0
     while c<5: #hashowanie i redukcja - tutaj przyjete 5 razy
         my_hash=minihash(plain_text)
@@ -41,7 +41,7 @@ def reduction():
         with open('hashes.txt', 'rb') as hashfile: #pobieramy hash do redukcji
             hash=hashfile.read()[-8:]
         reduced=minireduction(hash)
-    with open('plaintextes.txt', 'ab') as passes: # dodajemy nowye tekst do zahashowania
+    with open('plaintextes.txt', 'ab') as passes: # dodajemy nowy tekst do zahashowania
         passes.write(bytes(reduced, 'utf8'))
 
 def minihash(plain_text): #jej jedynym zadaniem jest wykonywanie hashy
